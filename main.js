@@ -58,7 +58,7 @@ function init() {
 
   } );
 
-  scene.add( controls.getObject() );
+  scene.add( controls.object );
 
   const onKeyDown = function ( event ) {
 
