@@ -244,12 +244,12 @@ function animate() {
     controls.moveRight( - velocity.x * delta );
     controls.moveForward( - velocity.z * delta );
 
-    controls.getObject().position.y += ( velocity.y * delta ); // new behavior
+    controls.object.position.y += ( velocity.y * delta ); // new behavior
 
-    if ( controls.getObject().position.y < 10 ) {
+    if ( controls.object.position.y < 10 ) {
 
       velocity.y = 0;
-      controls.getObject().position.y = 10;
+      controls.object.position.y = 10;
 
       canJump = true;
 
