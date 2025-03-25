@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import {PointerLockControls} from 'three/examples/jsm/controls/PointerLockControls.js';
+import {TextureLoader} from 'three'; // Import TextureLoader
 
 let camera, scene, renderer;
 let geometry, material, mesh;
@@ -22,243 +23,274 @@ animate();
 
 function init() {
 
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-  camera.position.y = 10;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.y = 10;
 
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0xadd8e6 ); // Light blue sky
-  scene.fog = new THREE.Fog( 0xadd8e6, 0, 750 );
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xadd8e6); // Light blue sky
+    scene.fog = new THREE.Fog(0xadd8e6, 0, 750);
 
-  const light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-  light.position.set( 0.5, 1, 0.75 ).normalize();
-  scene.add( light );
+    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+    light.position.set(0.5, 1, 0.75).normalize();
+    scene.add(light);
 
-  controls = new PointerLockControls( camera, document.body );
+    controls = new PointerLockControls(camera, document.body);
 
-  const blocker = document.getElementById( 'blocker' );
-  const instructions = document.getElementById( 'instructions' );
+    const blocker = document.getElementById('blocker');
+    const instructions = document.getElementById('instructions');
 
-  instructions.addEventListener( 'click', function () {
+    instructions.addEventListener('click', function () {
 
-    controls.lock();
+        controls.lock();
 
-  } );
+    });
 
-  controls.addEventListener( 'lock', function () {
+    controls.addEventListener('lock', function () {
 
-    instructions.style.display = 'none';
-    blocker.style.display = 'none';
+        instructions.style.display = 'none';
+        blocker.style.display = 'none';
 
-  } );
+    });
 
-  controls.addEventListener( 'unlock', function () {
+    controls.addEventListener('unlock', function () {
 
-    blocker.style.display = 'block';
-    instructions.style.display = '';
+        blocker.style.display = 'block';
+        instructions.style.display = '';
 
-  } );
+    });
 
-  scene.add( controls.object );
+    scene.add(controls.object);
 
-  const onKeyDown = function ( event ) {
+    const onKeyDown = function (event) {
 
-    switch ( event.code ) {
+        switch (event.code) {
 
-      case 'ArrowUp':
-      case 'KeyW':
-        moveForward = true;
-        break;
+            case 'ArrowUp':
+            case 'KeyW':
+                moveForward = true;
+                break;
 
-      case 'ArrowLeft':
-      case 'KeyA':
-        moveLeft = true;
-        break;
+            case 'ArrowLeft':
+            case 'KeyA':
+                moveLeft = true;
+                break;
 
-      case 'ArrowDown':
-      case 'KeyS':
-        moveBackward = true;
-        break;
+            case 'ArrowDown':
+            case 'KeyS':
+                moveBackward = true;
+                break;
 
-      case 'ArrowRight':
-      case 'KeyD':
-        moveRight = true;
-        break;
+            case 'ArrowRight':
+            case 'KeyD':
+                moveRight = true;
+                break;
 
-      case 'Space':
-        if ( canJump === true ) velocity.y += 350;
-        canJump = false;
-        break;
+            case 'Space':
+                if (canJump === true) velocity.y += 350;
+                canJump = false;
+                break;
+
+        }
+
+    };
+
+    const onKeyUp = function (event) {
+
+        switch (event.code) {
+
+            case 'ArrowUp':
+            case 'KeyW':
+                moveForward = false;
+                break;
+
+            case 'ArrowLeft':
+            case 'KeyA':
+                moveLeft = false;
+                break;
+
+            case 'ArrowDown':
+            case 'KeyS':
+                moveBackward = false;
+                break;
+
+            case 'ArrowRight':
+            case 'KeyD':
+                moveRight = false;
+                break;
+
+        }
+
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+
+    // ground
+
+    let floorGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
+    floorGeometry.rotateX(-Math.PI / 2);
+
+    // vertex displacement
+
+    let position = floorGeometry.attributes.position;
+
+    for (let i = 0, l = position.count; i < l; i++) {
+
+        vertex.fromBufferAttribute(position, i);
+
+        vertex.x += Math.random() * 20 - 10;
+        vertex.y += Math.random() * 2 - 1;
+        vertex.z += Math.random() * 20 - 10;
+
+        position.setXYZ(i, vertex.x, vertex.y, vertex.z);
 
     }
 
-  };
+    floorGeometry = floorGeometry.toNonIndexed(); // required for computing normals for flat surfaces
 
-  const onKeyUp = function ( event ) {
+    position.needsUpdate = true;
 
-    switch ( event.code ) {
+    floorGeometry.computeVertexNormals();
 
-      case 'ArrowUp':
-      case 'KeyW':
-        moveForward = false;
-        break;
+    const floorMaterial = new THREE.MeshBasicMaterial({color: 0xbeed94});
 
-      case 'ArrowLeft':
-      case 'KeyA':
-        moveLeft = false;
-        break;
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    scene.add(floor);
 
-      case 'ArrowDown':
-      case 'KeyS':
-        moveBackward = false;
-        break;
+    // Renderer
 
-      case 'ArrowRight':
-      case 'KeyD':
-        moveRight = false;
-        break;
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding; // Or THREE.LinearEncoding if your textures are already in linear space.
+    document.body.appendChild(renderer.domElement);
+
+    // Cubes /////////////////////////////////////////////////////////////////////////////////////////////
+
+    const boxGeometry = new THREE.BoxGeometry(20, 20, 20).toNonIndexed();
+
+    position = boxGeometry.attributes.position;
+    const colors = [];
+
+    for (let i = 0, l = position.count; i < l; i++) {
+
+        color.setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+        colors.push(color.r, color.g, color.b);
 
     }
 
-  };
+    boxGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-  document.addEventListener( 'keydown', onKeyDown );
-  document.addEventListener( 'keyup', onKeyUp );
+    // Texture loading and material creation
+    const textureLoader = new TextureLoader();
+    const texture1 = textureLoader.load('textures/crate.png');  // Replace with your texture path
+    texture1.encoding = THREE.sRGBEncoding;
+    texture1.magFilter = THREE.NearestFilter; // For zooming in
+    texture1.minFilter = THREE.NearestFilter; // For zooming out (important!)
+    texture1.anisotropy = renderer.capabilities.getMaxAnisotropy(); // Use the maximum supported by the GPU
 
-  // ground
+    const texture2 = textureLoader.load('textures/brick.png'); // Replace with your texture path
+    texture2.encoding = THREE.sRGBEncoding;
+    texture2.magFilter = THREE.NearestFilter; // For zooming in
+    texture2.minFilter = THREE.NearestFilter; // For zooming out (important!)
+    texture2.anisotropy = renderer.capabilities.getMaxAnisotropy(); // Use the maximum supported by the GPU
 
-  let floorGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
-  floorGeometry.rotateX( - Math.PI / 2 );
+    const col_palette = {
+        0: [0.95, 0.05, 0.05],
+        1: [0.05, 0.95, 0.05],
+        2: [0.05, 0.05, 0.95],
+        3: [0.05, 0.95, 0.95],
+        4: [0.95, 0.95, 0.05],
+        5: [1.00, 1.00, 1.00],
+    }
 
-  // vertex displacement
+    for (let i = 0; i < 500; i++) {
+        let boxMaterial;
 
-  let position = floorGeometry.attributes.position;
+        let col_choice = Math.floor(Math.random() * 7);
 
-  for ( let i = 0, l = position.count; i < l; i ++ ) {
+        const boxMaterialCol = new THREE.MeshPhongMaterial({specular: 0xffffff, flatShading: true, vertexColors: true});
 
-    vertex.fromBufferAttribute( position, i );
+        const boxMaterialTex = new THREE.MeshPhongMaterial(
+            {
+                map: texture1,
+                specular: 0,
+                shininess: 0,
+                flatShading: false, vertexColors: false
+            });
 
-    vertex.x += Math.random() * 20 - 10;
-    vertex.y += Math.random() * 2 - 1;
-    vertex.z += Math.random() * 20 - 10;
+        if (col_choice > 5) {
+            boxMaterial = boxMaterialTex;
+        } else {
+            let col = col_palette[col_choice]
+            boxMaterialCol.color.setRGB(col[0], col[1], col[2]);
+            boxMaterial = boxMaterialCol;
+        }
 
-    position.setXYZ( i, vertex.x, vertex.y, vertex.z );
+        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+        box.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+        box.position.y = Math.floor(Math.random() * 20) * 20 + 10;
+        box.position.z = Math.floor(Math.random() * 20 - 10) * 20;
 
-  }
+        scene.add(box);
 
-  floorGeometry = floorGeometry.toNonIndexed(); // required for computing normals for flat surfaces
+    }
 
-  position.needsUpdate = true;
+    //
 
-  floorGeometry.computeVertexNormals();
-
-  const floorMaterial = new THREE.MeshBasicMaterial( { color: 0xbeed94 } );
-
-  const floor = new THREE.Mesh( floorGeometry, floorMaterial );
-  scene.add( floor );
-
-  // Cubes
-
-  const boxGeometry = new THREE.BoxGeometry( 20, 20, 20 ).toNonIndexed();
-
-  position = boxGeometry.attributes.position;
-  const colors = [];
-
-  for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-    colors.push( color.r, color.g, color.b );
-
-  }
-
-  boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-  
-  const col_palette = { 0: [0.95, 0.05, 0.05], 
-                  1: [0.05, 0.95, 0.05],
-                  2: [0.05, 0.05, 0.95],
-                  3: [0.05, 0.95, 0.95],
-                  4: [0.95, 0.95, 0.05],
-                  5: [1.00, 1.00, 1.00],
-				}
-
-  for ( let i = 0; i < 500; i ++ ) {
-
-    const boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-    //boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-	let col_choice = Math.round(Math.random() * 5);
-	let col = col_palette[col_choice]
-    boxMaterial.color.setRGB( col[0], col[1], col[2] );
-
-    const box = new THREE.Mesh( boxGeometry, boxMaterial );
-    box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-    box.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
-    box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
-
-    scene.add( box );
-
-  }
-
-  // Renderer
-
-  renderer = new THREE.WebGLRenderer( { antialias: true } );
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  document.body.appendChild( renderer.domElement );
-
-  //
-
-  window.addEventListener( 'resize', onWindowResize );
+    window.addEventListener('resize', onWindowResize);
 
 }
 
 function onWindowResize() {
 
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
 
-  renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
 }
 
 function animate() {
 
-  requestAnimationFrame( animate );
+    requestAnimationFrame(animate);
 
-  const time = performance.now();
+    const time = performance.now();
 
-  if ( controls.isLocked === true ) {
+    if (controls.isLocked === true) {
 
-    const delta = ( time - prevTime ) / 1000;
+        const delta = (time - prevTime) / 1000;
 
-    velocity.x -= velocity.x * 10.0 * delta;
-    velocity.z -= velocity.z * 10.0 * delta;
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
 
-    velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-    direction.z = Number( moveForward ) - Number( moveBackward );
-    direction.x = Number( moveRight ) - Number( moveLeft );
-    direction.normalize(); // this ensures consistent movements in all directions
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+        direction.normalize(); // this ensures consistent movements in all directions
 
-    if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
-    if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
 
-    controls.moveRight( - velocity.x * delta );
-    controls.moveForward( - velocity.z * delta );
+        controls.moveRight(-velocity.x * delta);
+        controls.moveForward(-velocity.z * delta);
 
-    controls.object.position.y += ( velocity.y * delta ); // new behavior
+        controls.object.position.y += (velocity.y * delta); // new behavior
 
-    if ( controls.object.position.y < 10 ) {
+        if (controls.object.position.y < 10) {
 
-      velocity.y = 0;
-      controls.object.position.y = 10;
+            velocity.y = 0;
+            controls.object.position.y = 10;
 
-      canJump = true;
+            canJump = true;
+
+        }
 
     }
 
-  }
+    prevTime = time;
 
-  prevTime = time;
-
-  renderer.render( scene, camera );
+    renderer.render(scene, camera);
 
 }
