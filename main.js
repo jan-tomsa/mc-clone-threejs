@@ -91,6 +91,10 @@ function init() {
                 canJump = false;
                 break;
 
+            case 'KeyF':
+                velocity.y += 700;
+                break;
+
         }
 
     };
