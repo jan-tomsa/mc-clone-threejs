@@ -171,11 +171,22 @@ function init() {
   }
 
   boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+  
+  const col_palette = { 0: [0.95, 0.05, 0.05], 
+                  1: [0.05, 0.95, 0.05],
+                  2: [0.05, 0.05, 0.95],
+                  3: [0.05, 0.95, 0.95],
+                  4: [0.95, 0.95, 0.05],
+                  5: [1.00, 1.00, 1.00],
+				}
 
   for ( let i = 0; i < 500; i ++ ) {
 
     const boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-    boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+    //boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+	let col_choice = Math.round(Math.random() * 5);
+	let col = col_palette[col_choice]
+    boxMaterial.color.setRGB( col[0], col[1], col[2] );
 
     const box = new THREE.Mesh( boxGeometry, boxMaterial );
     box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
