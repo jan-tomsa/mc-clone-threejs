@@ -12,6 +12,7 @@ let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
 let canJump = false;
+let requestLocation = false;
 
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
@@ -29,11 +30,15 @@ function init() {
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xadd8e6); // Light blue sky
-    scene.fog = new THREE.Fog(0xadd8e6, 0, 750);
+    scene.fog = new THREE.Fog(0xadd8e6, 0, 1750);
 
-    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.05);
     light.position.set(0.5, 1, 0.75).normalize();
     scene.add(light);
+
+    const light2 = new THREE.SpotLight(0xffffff, 100);
+    light2.position.set(70,20,110);
+    scene.add(light2);
 
     controls = new PointerLockControls(camera, document.body);
 
@@ -93,6 +98,10 @@ function init() {
 
             case 'KeyF':
                 velocity.y += 700;
+                break;
+
+            case 'KeyL':
+                requestLocation = true;
                 break;
 
         }
@@ -252,7 +261,7 @@ function init() {
 
     window.addEventListener('resize', onWindowResize);
 
-    playerLight = new THREE.PointLight( 0xffffff, 1, 100 ); // Color, intensity, distance
+    playerLight = new THREE.PointLight( 0xffffff, 100, 100 ); // Color, intensity, distance
     playerLight.position.set( 0, 5, 0 ); // Initial position (adjust as needed)
     playerLight.castShadow = true;  // Optional: Enable shadows from the light
     scene.add( playerLight );
@@ -304,11 +313,17 @@ function animate() {
 
         }
 
+        if (requestLocation) {
+            console.table(controls.object.position);
+            requestLocation = false;
+        }
+
     }
 
     // Make the player light follow the camera
     controls.object.add(playerLight);
-    //playerLight.position.copy(camera.position);
+    playerLight.position.copy(controls.object.position);
+    // playerLight.position.copy(camera.position);
 
     prevTime = time;
 
