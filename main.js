@@ -5,6 +5,7 @@ import {TextureLoader} from 'three'; // Import TextureLoader
 let camera, scene, renderer;
 let geometry, material, mesh;
 let controls;
+let playerLight;
 
 let moveForward = false;
 let moveBackward = false;
@@ -163,6 +164,8 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding; // Or THREE.LinearEncoding if your textures are already in linear space.
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Or other shadow map types
     document.body.appendChild(renderer.domElement);
 
     // Cubes /////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,11 +212,11 @@ function init() {
 
         let col_choice = Math.floor(Math.random() * 8);
 
-        const boxMaterialCol = new THREE.MeshPhongMaterial({specular: 0xffffff, flatShading: true, vertexColors: true});
+        const boxMaterialCol = new THREE.MeshPhongMaterial({specular: 0xffffff, flatShading: true, vertexColors: false});
 
         if (col_choice > 5) {
             let tex;
-            if (col_choice == 6) {
+            if (col_choice === 6) {
                 tex = texture1;
             } else {
                 tex = texture2;
@@ -235,6 +238,7 @@ function init() {
         box.position.x = Math.floor(Math.random() * 20 - 10) * 20;
         box.position.y = Math.floor(Math.random() * 20) * 20 + 10;
         box.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+        box.castShadow = true;
 
         scene.add(box);
 
@@ -243,6 +247,11 @@ function init() {
     //
 
     window.addEventListener('resize', onWindowResize);
+
+    playerLight = new THREE.PointLight( 0xffffff, 1, 100 ); // Color, intensity, distance
+    playerLight.position.set( 0, 5, 0 ); // Initial position (adjust as needed)
+    playerLight.castShadow = true;  // Optional: Enable shadows from the light
+    scene.add( playerLight );
 
 }
 
@@ -292,6 +301,10 @@ function animate() {
         }
 
     }
+
+    // Make the player light follow the camera
+    controls.object.add(playerLight);
+    //playerLight.position.copy(camera.position);
 
     prevTime = time;
 
