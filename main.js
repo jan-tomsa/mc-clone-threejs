@@ -207,20 +207,24 @@ function init() {
     for (let i = 0; i < 500; i++) {
         let boxMaterial;
 
-        let col_choice = Math.floor(Math.random() * 7);
+        let col_choice = Math.floor(Math.random() * 8);
 
         const boxMaterialCol = new THREE.MeshPhongMaterial({specular: 0xffffff, flatShading: true, vertexColors: true});
 
-        const boxMaterialTex = new THREE.MeshPhongMaterial(
-            {
-                map: texture1,
-                specular: 0,
-                shininess: 0,
-                flatShading: false, vertexColors: false
-            });
-
         if (col_choice > 5) {
-            boxMaterial = boxMaterialTex;
+            let tex;
+            if (col_choice == 6) {
+                tex = texture1;
+            } else {
+                tex = texture2;
+            }
+            boxMaterial = new THREE.MeshPhongMaterial(
+                {
+                    map: tex,
+                    specular: 0,
+                    shininess: 0,
+                    flatShading: false, vertexColors: false
+                });
         } else {
             let col = col_palette[col_choice]
             boxMaterialCol.color.setRGB(col[0], col[1], col[2]);
