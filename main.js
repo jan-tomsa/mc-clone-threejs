@@ -13,13 +13,42 @@ let moveRight = false;
 let canJump = false;
 let requestLocation = false;
 
+// Coordinates display element
+let coordinatesDisplay;
+
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 const vertex = new THREE.Vector3();
 const color = new THREE.Color();
 
+// Create coordinates display element
+function createCoordinatesDisplay() {
+    coordinatesDisplay = document.createElement('div');
+    coordinatesDisplay.id = 'coordinates';
+    coordinatesDisplay.style.position = 'absolute';
+    coordinatesDisplay.style.top = '10px';
+    coordinatesDisplay.style.right = '10px';
+    coordinatesDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    coordinatesDisplay.style.color = 'white';
+    coordinatesDisplay.style.padding = '10px';
+    coordinatesDisplay.style.borderRadius = '5px';
+    coordinatesDisplay.style.fontFamily = 'monospace';
+    coordinatesDisplay.style.fontSize = '14px';
+    coordinatesDisplay.style.zIndex = '100';
+    document.body.appendChild(coordinatesDisplay);
+}
+
+// Update coordinates display
+function updateCoordinatesDisplay() {
+    if (coordinatesDisplay && controls.object) {
+        const position = controls.object.position;
+        coordinatesDisplay.innerHTML = `X: ${position.x.toFixed(2)}<br>Y: ${position.y.toFixed(2)}<br>Z: ${position.z.toFixed(2)}`;
+    }
+}
+
 init();
+createCoordinatesDisplay();
 animate();
 
 function init() {
@@ -312,6 +341,9 @@ function animate() {
 
     prevTime = time;
 
+    // Update coordinates display
+    updateCoordinatesDisplay();
+    
     renderer.render(scene, camera);
 
 }
