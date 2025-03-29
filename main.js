@@ -32,11 +32,11 @@ function init() {
     scene.background = new THREE.Color(0xadd8e6); // Light blue sky
     scene.fog = new THREE.Fog(0xadd8e6, 0, 1750);
 
-    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.05);
+    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.01);
     light.position.set(0.5, 1, 0.75).normalize();
     scene.add(light);
 
-    const light2 = new THREE.SpotLight(0xffffff, 100);
+    const light2 = new THREE.Light(0xffffff, 100);
     light2.position.set(70,20,110);
     scene.add(light2);
 
@@ -322,7 +322,10 @@ function animate() {
 
     // Make the player light follow the camera
     controls.object.add(playerLight);
-    playerLight.position.copy(controls.object.position);
+    playerLight.position.x = controls.object.position.x;
+    playerLight.position.y = controls.object.position.y;
+    playerLight.position.z = controls.object.position.z;
+    // playerLight.position.copy(controls.object.position);
     // playerLight.position.copy(camera.position);
 
     prevTime = time;
