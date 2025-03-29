@@ -5,7 +5,6 @@ import {TextureLoader} from 'three'; // Import TextureLoader
 let camera, scene, renderer;
 let geometry, material, mesh;
 let controls;
-let playerLight;
 
 let moveForward = false;
 let moveBackward = false;
@@ -32,13 +31,9 @@ function init() {
     scene.background = new THREE.Color(0xadd8e6); // Light blue sky
     scene.fog = new THREE.Fog(0xadd8e6, 0, 1750);
 
-    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.01);
+    const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
     light.position.set(0.5, 1, 0.75).normalize();
     scene.add(light);
-
-    const light2 = new THREE.Light(0xffffff, 100);
-    light2.position.set(70,20,110);
-    scene.add(light2);
 
     controls = new PointerLockControls(camera, document.body);
 
@@ -260,12 +255,7 @@ function init() {
     //
 
     window.addEventListener('resize', onWindowResize);
-
-    playerLight = new THREE.PointLight( 0xffffff, 100, 100 ); // Color, intensity, distance
-    playerLight.position.set( 0, 5, 0 ); // Initial position (adjust as needed)
-    playerLight.castShadow = true;  // Optional: Enable shadows from the light
-    scene.add( playerLight );
-
+    
 }
 
 function onWindowResize() {
@@ -319,14 +309,6 @@ function animate() {
         }
 
     }
-
-    // Make the player light follow the camera
-    controls.object.add(playerLight);
-    playerLight.position.x = controls.object.position.x;
-    playerLight.position.y = controls.object.position.y;
-    playerLight.position.z = controls.object.position.z;
-    // playerLight.position.copy(controls.object.position);
-    // playerLight.position.copy(camera.position);
 
     prevTime = time;
 
