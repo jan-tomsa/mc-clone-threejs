@@ -163,37 +163,14 @@ function init() {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
 
+    // Create texture loader before using it anywhere
+    const textureLoader = new TextureLoader();
+
     // ground
 
     let floorGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
     floorGeometry.rotateX(-Math.PI / 2);
 
-    // vertex displacement
-
-    let position = floorGeometry.attributes.position;
-
-    for (let i = 0, l = position.count; i < l; i++) {
-
-        vertex.fromBufferAttribute(position, i);
-
-        vertex.x += Math.random() * 20 - 10;
-        vertex.y += Math.random() * 2 - 1;
-        vertex.z += Math.random() * 20 - 10;
-
-        position.setXYZ(i, vertex.x, vertex.y, vertex.z);
-
-    }
-
-    floorGeometry = floorGeometry.toNonIndexed(); // required for computing normals for flat surfaces
-
-    position.needsUpdate = true;
-
-    floorGeometry.computeVertexNormals();
-
-    const floorMaterial = new THREE.MeshBasicMaterial({color: 0xbeed94});
-
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    scene.add(floor);
 
     // Renderer
 
@@ -205,11 +182,29 @@ function init() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Or other shadow map types
     document.body.appendChild(renderer.domElement);
 
+    // Load ground texture
+    const groundTexture = textureLoader.load('textures/grass.png');
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(100, 100); // Adjust the repeat value as needed
+    groundTexture.encoding = THREE.sRGBEncoding;
+    groundTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    // Use MeshPhongMaterial instead of MeshBasicMaterial for better lighting effects
+    const floorMaterial = new THREE.MeshPhongMaterial({
+        map: groundTexture,
+        shininess: 0,  // No shininess for a matte look
+        // bumpScale: 0.2 // Subtle bump effect
+    });
+
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    scene.add(floor);
+
     // Cubes /////////////////////////////////////////////////////////////////////////////////////////////
 
     const boxGeometry = new THREE.BoxGeometry(20, 20, 20).toNonIndexed();
 
-    position = boxGeometry.attributes.position;
+    let position = boxGeometry.attributes.position;
     const colors = [];
 
     for (let i = 0, l = position.count; i < l; i++) {
@@ -221,9 +216,8 @@ function init() {
 
     boxGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-    // Texture loading and material creation
-    const textureLoader = new TextureLoader();
-    const texture1 = textureLoader.load('textures/crate.png');  // Replace with your texture path
+    // Load textures for cubes
+    const texture1 = textureLoader.load('textures/crate.png');
     texture1.encoding = THREE.sRGBEncoding;
     texture1.magFilter = THREE.NearestFilter; // For zooming in
     texture1.minFilter = THREE.NearestFilter; // For zooming out (important!)
