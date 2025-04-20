@@ -33,15 +33,7 @@ export class CoordinatesDisplay {
         // Calculate direction based on player's rotation
         let facing = 'north';
         if (direction) {
-            // Convert rotation to degrees and normalize to 0-360
-            const degrees = (direction * (180/Math.PI)) % 360;
-            const normalized = degrees < 0 ? degrees + 360 : degrees;
-            
-            // Determine cardinal direction
-            if (normalized >= 315 || normalized < 45) facing = 'north';
-            else if (normalized >= 45 && normalized < 135) facing = 'east';
-            else if (normalized >= 135 && normalized < 225) facing = 'south';
-            else facing = 'west';
+            facing = computeFacing(direction);
         }
         
         this.element.innerHTML = `
@@ -68,5 +60,22 @@ export class CoordinatesDisplay {
         if (this.element) {
             this.element.style.display = 'none';
         }
+    }
+}
+
+// Change from a regular function to an exported function
+export function computeFacing(direction) {
+    // Convert rotation to degrees and normalize to 0-360
+    const degrees = (direction * (180 / Math.PI)) % 360;
+
+    // Determine the cardinal direction based on the angle
+    if (degrees >= 315 || degrees < 45) {
+        return 'north';
+    } else if (degrees >= 45 && degrees < 135) {
+        return 'east';
+    } else if (degrees >= 135 && degrees < 225) {
+        return 'south';
+    } else {
+        return 'west';
     }
 }

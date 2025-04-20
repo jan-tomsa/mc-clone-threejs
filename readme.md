@@ -29,3 +29,13 @@ src/
 └── config/
     └── constants.js
 ```
+
+# Unit testing
+
+```
+npm install --save-dev mocha chai @babel/core @babel/preset-env @babel/register
+```
+
+```
+npm test
+```
