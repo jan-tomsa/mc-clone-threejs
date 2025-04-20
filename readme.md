@@ -1,3 +1,9 @@
+Setup:
+
+```
+npm install
+```
+
 Running:
 
 ```
