@@ -87,6 +87,9 @@ export class Game {
         if (this.controls.isLocked) {
             this.controls.update(delta);
             this.coordinates.update(this.camera.position);
+            
+            // Example usage in your game loop or player update function
+            this.coordinates.update(this.camera.position, this.camera.rotation.y);
         }
 
         this.prevTime = time;
